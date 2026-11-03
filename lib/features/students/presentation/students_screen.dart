@@ -215,22 +215,40 @@ class StudentsScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          onTap: () {
+                            context.push(
+                              '/admin/students/${student.id}/dashboard?name=${Uri.encodeComponent(student.name)}',
+                            );
+                          },
                           trailing: PopupMenuButton<String>(
                             icon: const Icon(Icons.more_vert_rounded),
                             onSelected: (val) {
-                              if (val == 'syllabus') {
-                                context.push(
-                                  '/admin/students/${student.id}/syllabus?name=${Uri.encodeComponent(student.name)}',
-                                );
+                              final encName = Uri.encodeComponent(student.name);
+                              if (val == 'dashboard') {
+                                context.push('/admin/students/${student.id}/dashboard?name=$encName');
+                              } else if (val == 'syllabus') {
+                                context.push('/admin/students/${student.id}/syllabus?name=$encName');
                               } else if (val == 'results') {
-                                context.push(
-                                  '/admin/students/${student.id}/results?name=${Uri.encodeComponent(student.name)}',
-                                );
+                                context.push('/admin/students/${student.id}/results?name=$encName');
+                              } else if (val == 'tests') {
+                                context.push('/admin/students/${student.id}/tests?name=$encName');
+                              } else if (val == 'scores') {
+                                context.push('/admin/students/${student.id}/scores?name=$encName');
                               } else if (val == 'edit') {
                                 _showEditStudentDialog(context, ref, student);
                               }
                             },
                             itemBuilder: (ctx) => [
+                              const PopupMenuItem(
+                                value: 'dashboard',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.dashboard_outlined, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('View Dashboard'),
+                                  ],
+                                ),
+                              ),
                               const PopupMenuItem(
                                 value: 'syllabus',
                                 child: Row(
@@ -248,6 +266,26 @@ class StudentsScreen extends ConsumerWidget {
                                     Icon(Icons.workspace_premium_rounded, size: 18),
                                     SizedBox(width: 8),
                                     Text('View Results'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'tests',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.alarm, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('View Routine'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'scores',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.grade_outlined, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('View Scores'),
                                   ],
                                 ),
                               ),

@@ -185,6 +185,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const NotesScreen(isAdmin: false),
       ),
 
+      // Admin view of a student's dashboard (read-only)
+      GoRoute(
+        path: '/admin/students/:id/dashboard',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final studentId = state.pathParameters['id']!;
+          final studentName = state.uri.queryParameters['name'];
+          return DashboardScreen(
+            studentIdOverride: studentId,
+            studentName: studentName,
+          );
+        },
+      ),
+
       // Admin view of a student's syllabus (read-only)
       GoRoute(
         path: '/admin/students/:id/syllabus',
@@ -207,6 +221,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final studentId = state.pathParameters['id']!;
           final studentName = state.uri.queryParameters['name'];
           return ResultsScreen(
+            studentIdOverride: studentId,
+            studentName: studentName,
+          );
+        },
+      ),
+
+      // Admin view of a student's upcoming tests routine (read-only)
+      GoRoute(
+        path: '/admin/students/:id/tests',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final studentId = state.pathParameters['id']!;
+          final studentName = state.uri.queryParameters['name'];
+          return TestsScreen(
+            studentIdOverride: studentId,
+            studentName: studentName,
+          );
+        },
+      ),
+
+      // Admin view of a student's test scores (read-only)
+      GoRoute(
+        path: '/admin/students/:id/scores',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final studentId = state.pathParameters['id']!;
+          final studentName = state.uri.queryParameters['name'];
+          return TestScoresScreen(
             studentIdOverride: studentId,
             studentName: studentName,
           );
