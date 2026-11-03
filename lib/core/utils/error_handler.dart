@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ErrorHandler {
+  static String friendlyMessage(dynamic error) => getFriendlyErrorMessage(error);
+
   static String getFriendlyErrorMessage(dynamic error) {
     if (error == null) return 'An unexpected error occurred.';
 
