@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../auth/domain/user_profile.dart';
 import '../../../core/utils/error_handler.dart';
 import 'students_controller.dart';
@@ -214,10 +215,39 @@ class StudentsScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          trailing: IconButton(
+                          trailing: PopupMenuButton<String>(
                             icon: const Icon(Icons.more_vert_rounded),
-                            onPressed: () =>
-                                _showEditStudentDialog(context, ref, student),
+                            onSelected: (val) {
+                              if (val == 'syllabus') {
+                                context.push(
+                                  '/admin/students/${student.id}/syllabus?name=${Uri.encodeComponent(student.name)}',
+                                );
+                              } else if (val == 'edit') {
+                                _showEditStudentDialog(context, ref, student);
+                              }
+                            },
+                            itemBuilder: (ctx) => [
+                              const PopupMenuItem(
+                                value: 'syllabus',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.auto_stories_rounded, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('View Syllabus'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit_outlined, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('Edit Student'),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );

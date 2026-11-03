@@ -183,6 +183,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const NotesScreen(isAdmin: false),
       ),
+
+      // Admin view of a student's syllabus (read-only)
+      GoRoute(
+        path: '/admin/students/:id/syllabus',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final studentId = state.pathParameters['id']!;
+          final studentName = state.uri.queryParameters['name'];
+          return SyllabusScreen(
+            studentIdOverride: studentId,
+            studentName: studentName,
+          );
+        },
+      ),
     ],
   );
 });
