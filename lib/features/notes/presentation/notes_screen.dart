@@ -309,23 +309,21 @@ class _UploadNoteSheetState extends ConsumerState<_UploadNoteSheet> {
   String? _error;
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
-      withData: true,
     );
 
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      if (file.bytes != null) {
-        setState(() {
-          _pickedFileName = file.name;
-          _pickedFileBytes = file.bytes;
-          if (_titleController.text.isEmpty) {
-            _titleController.text = file.name.replaceAll(RegExp(r'\.[^.]+$'), '');
-          }
-        });
-      }
+    if (files.isNotEmpty) {
+      final file = files.first;
+      final bytes = await file.readAsBytes();
+      setState(() {
+        _pickedFileName = file.name;
+        _pickedFileBytes = bytes;
+        if (_titleController.text.isEmpty) {
+          _titleController.text = file.name.replaceAll(RegExp(r'\.[^.]+$'), '');
+        }
+      });
     }
   }
 

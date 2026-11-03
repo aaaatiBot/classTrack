@@ -710,12 +710,12 @@ class SyllabusScreen extends ConsumerWidget {
 
     File? file;
     if (source == 'pdf') {
-      final res = await FilePicker.platform.pickFiles(
+      final files = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
       );
-      if (res != null && res.files.single.path != null) {
-        file = File(res.files.single.path!);
+      if (files.isNotEmpty && files.first.path != null) {
+        file = File(files.first.path!);
       }
     } else {
       final picker = ImagePicker();
