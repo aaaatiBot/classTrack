@@ -88,6 +88,30 @@ class ReportCardParser {
     return results;
   }
 
+  /// Detects term number (1, 2, or 3) from text heuristics
+  static int detectTerm(String text) {
+    final lower = text.toLowerCase();
+    if (lower.contains('3rd') ||
+        lower.contains('third') ||
+        lower.contains('term 3') ||
+        lower.contains('term3') ||
+        lower.contains('exam 3')) {
+      return 3;
+    }
+    if (lower.contains('2nd') ||
+        lower.contains('second') ||
+        lower.contains('term 2') ||
+        lower.contains('term2') ||
+        lower.contains('exam 2')) {
+      return 2;
+    }
+    final match = RegExp(r'\b([1-3])(?:st|nd|rd)?\b').firstMatch(lower);
+    if (match != null) {
+      return int.tryParse(match.group(1)!) ?? 1;
+    }
+    return 1;
+  }
+
   static bool _isIgnoredWord(String text, Set<String> ignored) {
     final lower = text.toLowerCase().trim();
     return ignored.any((word) => lower.contains(word));
