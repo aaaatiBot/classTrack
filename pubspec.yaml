@@ -23,6 +23,23 @@ dependencies:
   # Formatting & Date/Time
   intl: ^0.20.2
 
+  # Charts & Graphs
+  fl_chart: ^0.70.2
+
+  # Media & File Picking
+  image_picker: ^1.1.2
+  file_picker: ^8.1.7
+
+  # PDF Processing & Rendering
+  syncfusion_flutter_pdf: ^28.2.9
+  pdfx: ^2.6.0
+
+  # On-device ML Kit OCR
+  google_mlkit_text_recognition: ^0.14.0
+
+  # Local Reminders & Notifications
+  flutter_local_notifications: ^18.0.1
+
   # UI Icons
   cupertino_icons: ^1.0.8
 
