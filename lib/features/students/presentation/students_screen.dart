@@ -222,6 +222,10 @@ class StudentsScreen extends ConsumerWidget {
                                 context.push(
                                   '/admin/students/${student.id}/syllabus?name=${Uri.encodeComponent(student.name)}',
                                 );
+                              } else if (val == 'results') {
+                                context.push(
+                                  '/admin/students/${student.id}/results?name=${Uri.encodeComponent(student.name)}',
+                                );
                               } else if (val == 'edit') {
                                 _showEditStudentDialog(context, ref, student);
                               }
@@ -234,6 +238,16 @@ class StudentsScreen extends ConsumerWidget {
                                     Icon(Icons.auto_stories_rounded, size: 18),
                                     SizedBox(width: 8),
                                     Text('View Syllabus'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'results',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.workspace_premium_rounded, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('View Results'),
                                   ],
                                 ),
                               ),

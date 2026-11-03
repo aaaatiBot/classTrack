@@ -198,6 +198,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+
+      // Admin view of a student's past results (read-only)
+      GoRoute(
+        path: '/admin/students/:id/results',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final studentId = state.pathParameters['id']!;
+          final studentName = state.uri.queryParameters['name'];
+          return ResultsScreen(
+            studentIdOverride: studentId,
+            studentName: studentName,
+          );
+        },
+      ),
     ],
   );
 });
