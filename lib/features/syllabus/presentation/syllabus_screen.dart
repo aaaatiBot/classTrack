@@ -1,10 +1,17 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../../core/utils/error_handler.dart';
+import '../data/syllabus_ai_service.dart';
 import '../domain/syllabus_models.dart';
+import '../utils/document_text_extractor.dart';
 import 'syllabus_controller.dart';
+import 'syllabus_review_screen.dart';
 
 class SyllabusScreen extends ConsumerWidget {
   final String? studentIdOverride; // When admin views student's syllabus (read-only)
@@ -34,12 +41,18 @@ class SyllabusScreen extends ConsumerWidget {
           studentName != null ? "$studentName's Syllabus" : 'My Syllabus',
         ),
         actions: [
-          if (!isReadOnly)
+          if (!isReadOnly) ...[
+            IconButton(
+              icon: const Icon(Icons.document_scanner_rounded),
+              tooltip: 'Import Syllabus (PDF / Photo)',
+              onPressed: () => _handleImportSyllabus(context, ref, studentId),
+            ),
             IconButton(
               icon: const Icon(Icons.add_rounded),
               tooltip: 'Add Subject',
               onPressed: () => _showAddSubjectDialog(context, ref, studentId),
             ),
+          ],
         ],
       ),
       body: Column(
@@ -650,5 +663,152 @@ class SyllabusScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleImportSyllabus(
+    BuildContext context,
+    WidgetRef ref,
+    String studentId,
+  ) async {
+    // Show picker choice: PDF or Photo
+    final source = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_rounded, color: Colors.red),
+                title: const Text('Pick PDF Document'),
+                subtitle: const Text('Extracts text layer or renders scanned pages'),
+                onTap: () => Navigator.pop(ctx, 'pdf'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded, color: Colors.blue),
+                title: const Text('Pick Image from Gallery'),
+                subtitle: const Text('Runs on-device ML Kit OCR'),
+                onTap: () => Navigator.pop(ctx, 'gallery'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded, color: Colors.green),
+                title: const Text('Take Photo with Camera'),
+                subtitle: const Text('Photograph textbook syllabus'),
+                onTap: () => Navigator.pop(ctx, 'camera'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (source == null || !context.mounted) return;
+
+    File? file;
+    if (source == 'pdf') {
+      final res = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      if (res != null && res.files.single.path != null) {
+        file = File(res.files.single.path!);
+      }
+    } else {
+      final picker = ImagePicker();
+      final img = await picker.pickImage(
+        source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+        maxWidth: 2048,
+      );
+      if (img != null) {
+        file = File(img.path);
+      }
+    }
+
+    if (file == null || !context.mounted) return;
+
+    // Show Progress Dialog
+    String status = 'Extracting text from document...';
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Text(
+                  status,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final extractedText = await DocumentTextExtractor.extractTextFromFile(file);
+
+      if (extractedText.trim().isEmpty) {
+        throw Exception(
+          'Could not extract text from this document. Please ensure the image is clear or enter the syllabus manually.',
+        );
+      }
+
+      final aiService = SyllabusAiService(Supabase.instance.client);
+      final drafts = await aiService.parseSyllabusText(extractedText);
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close progress dialog
+
+        if (drafts.isEmpty) {
+          throw Exception('No subjects or chapters recognized in this document.');
+        }
+
+        // Navigate to Editable Review Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SyllabusReviewScreen(
+              initialDrafts: drafts,
+              studentId: studentId,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close progress dialog
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('AI Import Unavailable'),
+            content: Text(
+              '${ErrorHandler.getFriendlyErrorMessage(e)}\n\nWould you like to add subjects and chapters manually?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _showAddSubjectDialog(context, ref, studentId);
+                },
+                child: const Text('Add Manually'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 }
