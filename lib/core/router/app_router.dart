@@ -6,6 +6,7 @@ import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/dashboard/presentation/admin_home_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/homework/presentation/homework_and_notes_screen.dart';
 import '../../features/homework/presentation/homework_screen.dart';
 import '../../features/notes/presentation/notes_screen.dart';
 import '../../features/results/presentation/results_screen.dart';
@@ -100,7 +101,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/admin/homework-notes',
-                builder: (context, state) => const HomeworkScreen(isAdmin: true),
+                builder: (context, state) => const HomeworkAndNotesScreen(isAdmin: true),
               ),
             ],
           ),
